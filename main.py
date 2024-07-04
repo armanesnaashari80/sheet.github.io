@@ -2,9 +2,13 @@ import streamlit as st
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
+import os
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = Credentials.from_service_account_file("C:/Users/Alijenab/PycharmProjects/pythonProject15/booming-voice-427922-g9-2639ea16e492.json", scopes=scope)
+
+# تنظیم مسیر فایل JSON از طریق متغیر محیطی
+json_file_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+creds = Credentials.from_service_account_file(json_file_path, scopes=scope)
 client = gspread.authorize(creds)
 
 sheet_url = "https://docs.google.com/spreadsheets/d/1zs_jjSotWm0Xb09NfVzamGEpzJkX-Gw1FEKBNtuju_0/edit?usp=sharing"
