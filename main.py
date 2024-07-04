@@ -2,14 +2,21 @@ import streamlit as st
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
+import os
 
+# تنظیمات اتصال به Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = Credentials.from_service_account_file("C:/Users/Alijenab/PycharmProjects/pythonProject15/booming-voice-427922-g9-2e055ec58a87.json", scopes=scope)
+
+# تنظیم مسیر فایل JSON از طریق متغیر محیطی
+json_file_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+creds = Credentials.from_service_account_file(json_file_path, scopes=scope)
 client = gspread.authorize(creds)
 
+# اتصال به شیت مورد نظر
 sheet_url = "https://docs.google.com/spreadsheets/d/1zs_jjSotWm0Xb09NfVzamGEpzJkX-Gw1FEKBNtuju_0/edit?usp=sharing"
 sheet = client.open_by_url(sheet_url).sheet1
 
+# توابع برای دریافت، افزودن، ویرایش و حذف داده‌ها
 def get_data():
     data = sheet.get_all_records()
     return pd.DataFrame(data)
@@ -24,6 +31,7 @@ def update_data_in_sheet(row_index, data):
 def delete_data_in_sheet(row_index):
     sheet.delete_rows(row_index + 2)
 
+# تنظیمات ظاهری و ست کردن صفحه Streamlit
 st.set_page_config(
     page_title="My Google Sheet",
     page_icon="📈📉",
@@ -60,12 +68,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# عنوان اصلی برنامه
 st.title("📈 My Google Sheet 📉")
 
+# نمایش داده‌ها
 st.header("⬇ My Data ⬇")
 data = get_data()
 st.dataframe(data, width=1000, height=400)
 
+# افزودن داده جدید
 st.header("➕ Add New Data")
 with st.form(key='add_data_form'):
     new_data = {}
@@ -83,10 +94,12 @@ if submit_button:
     else:
         st.error("Please fill in at least one field.")
 
+# نمایش داده‌های به‌روزرسانی شده
 data = get_data()
 st.header("📄 Updated Data")
 st.dataframe(data, width=1000, height=400)
 
+# ویرایش داده
 st.header("✏️ Edit Data")
 selected_row = st.number_input("Enter the row number to edit", min_value=1, max_value=len(data))
 if selected_row:
@@ -109,6 +122,7 @@ if selected_row:
     data = get_data()
     st.dataframe(data, width=1000, height=400)
 
+# حذف داده
 st.header("❌ Delete Data")
 delete_row = st.number_input("Enter the row number to delete", min_value=1, max_value=len(data))
 delete_button = st.button(label='Delete Data')
